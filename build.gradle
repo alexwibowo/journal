@@ -6,11 +6,6 @@
  * User Manual available at https://docs.gradle.org/5.2.1/userguide/java_library_plugin.html
  */
 
-repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
-}
 
 buildscript {
  	repositories {
@@ -36,13 +31,19 @@ subprojects {
 			downloadSources = true
 		}
 	}
+	
+	repositories {
+		mavenCentral()
+		jcenter()
+		mavenLocal()
+	}
 
 	dependencies {
     		// This dependency is exported to consumers, that is to say found on their compile classpath.
 		api group:"org.jetbrains", name:"annotations", version:jetbrainsAnnotationsVersion
 
-    		// This dependency is used internally, and not exposed to consumers on their own compile classpath.
-    		implementation 'com.google.guava:guava:27.0.1-jre'
+		// This dependency is used internally, and not exposed to consumers on their own compile classpath.
+		implementation 'com.google.guava:guava:27.0.1-jre'
 
 		testImplementation group:"org.assertj", name:"assertj-core", version:assertjVersion
 		testImplementation group:"org.awaitility", name:"awaitility", version:awaitilityVersion

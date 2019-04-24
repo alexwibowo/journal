@@ -9,4 +9,4 @@
 
 rootProject.name = 'journal'
 
-include 'api','chronicle'
+include 'api','chronicle','inMemory'
