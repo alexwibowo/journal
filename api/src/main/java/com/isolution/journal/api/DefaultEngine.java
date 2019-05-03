@@ -20,7 +20,7 @@ public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$I
 
     @Override
     public boolean processOne() {
-        // replay all events in output queue, to bring state up to date
+        // replay all events in output queue, to bring engine's state up to date
         final boolean readOutputEvent = outputEventReader.read(new EventConsumer<$OutputEvent>() {
             @Override
             public void onMessage(final long eventTimeNanos,
