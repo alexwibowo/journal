@@ -39,7 +39,7 @@ public final class InMemoryEventQueue<$Event> implements EventQueue<$Event> {
         public boolean read(final EventConsumer<$Event> eventConsumer) {
             final $Event event = queue.poll();
             if (event != null) {
-                eventConsumer.onMessage(timeProvider.currentTimeNanos(), messageIndex++, event);
+                eventConsumer.onEvent(timeProvider.currentTimeNanos(), messageIndex++, event);
                 return true;
             } else {
                 return false;

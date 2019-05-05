@@ -23,9 +23,9 @@ public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$I
         // replay all events in output queue, to bring engine's state up to date
         final boolean readOutputEvent = outputEventReader.read(new EventConsumer<$OutputEvent>() {
             @Override
-            public void onMessage(final long eventTimeNanos,
-                                  final long messageIndex,
-                                  final $OutputEvent event) {
+            public void onEvent(final long eventTimeNanos,
+                                final long messageIndex,
+                                final $OutputEvent event) {
                 onOutputEvent(eventTimeNanos, messageIndex, event);
             }
         });
@@ -38,9 +38,9 @@ public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$I
         // when there is no more events in output queue, start reading from input queue
         final boolean readInputEvent = inputEventReader.read(new EventConsumer<$InputEvent>() {
             @Override
-            public void onMessage(final long eventTimeNanos,
-                                  final long messageIndex,
-                                  final $InputEvent event) {
+            public void onEvent(final long eventTimeNanos,
+                                final long messageIndex,
+                                final $InputEvent event) {
                 onInputEvent(eventTimeNanos, messageIndex, event);
             }
         });
