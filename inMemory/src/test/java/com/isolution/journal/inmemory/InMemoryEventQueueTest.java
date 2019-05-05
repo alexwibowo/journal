@@ -1,6 +1,7 @@
 package com.isolution.journal.inmemory;
 
 import com.isolution.journal.api.EventAppender;
+import com.isolution.journal.api.EventConsumer;
 import com.isolution.journal.api.EventReader;
 import net.openhft.chronicle.core.time.SetTimeProvider;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +23,7 @@ class InMemoryEventQueueTest {
     private SetTimeProvider timeProvider;
     private @NotNull EventAppender<String> appender;
     private @NotNull EventReader<String> reader;
+    private EventConsumer<String> appendToConsumedEvents;
 
     @BeforeEach
     void setUp() {
@@ -30,6 +32,14 @@ class InMemoryEventQueueTest {
         inMemoryEventQueue = new InMemoryEventQueue<>(timeProvider);
         appender = inMemoryEventQueue.appender();
         reader = inMemoryEventQueue.reader();
+
+        appendToConsumedEvents = (eventTimeNanos, messageIndex, message) -> consumedEvents.add(new JournalEvent(eventTimeNanos, messageIndex, message));
+    }
+
+    @Test
+    void initially_empty() {
+        reader.read(appendToConsumedEvents);
+        assertThat(consumedEvents).isEmpty();
     }
 
     @Test
@@ -37,8 +47,8 @@ class InMemoryEventQueueTest {
         appender.appendEvent("Hello " + 1);
         appender.appendEvent("Hello " + 2);
 
-        reader.read((eventTimeNanos, messageIndex, message) -> consumedEvents.add(new JournalEvent(eventTimeNanos, messageIndex, message)));
-        reader.read((eventTimeNanos, messageIndex, message) -> consumedEvents.add(new JournalEvent(eventTimeNanos, messageIndex, message)));
+        reader.read(appendToConsumedEvents);
+        reader.read(appendToConsumedEvents);
 
         assertThat(consumedEvents).hasSize(2);
         assertThat(consumedEvents)
