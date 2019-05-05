@@ -19,7 +19,7 @@ public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$I
     }
 
     @Override
-    public boolean processOne() {
+    public EngineProcessingResult processOne() {
         // replay all events in output queue, to bring engine's state up to date
         final boolean readOutputEvent = outputEventReader.read(new EventConsumer<$OutputEvent>() {
             @Override
@@ -32,7 +32,7 @@ public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$I
 
 
         if (readOutputEvent) {
-            return true;
+            return EngineProcessingResult.PROCESSED_OUTPUT;
         }
 
         // when there is no more events in output queue, start reading from input queue
@@ -46,10 +46,10 @@ public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$I
         });
 
         if (readInputEvent) {
-            return true;
+            return EngineProcessingResult.PROCESSED_INPUT;
         }
 
-        return false;
+        return EngineProcessingResult.IDLE;
     }
 
     private void onOutputEvent(final long eventTimeNanos,

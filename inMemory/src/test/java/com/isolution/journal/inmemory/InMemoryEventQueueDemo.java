@@ -1,9 +1,6 @@
 package com.isolution.journal.inmemory;
 
-import com.isolution.journal.api.DefaultEngine;
-import com.isolution.journal.api.EventAppender;
-import com.isolution.journal.api.EventProcessor;
-import com.isolution.journal.api.EventQueue;
+import com.isolution.journal.api.*;
 
 public class InMemoryEventQueueDemo {
 
@@ -33,7 +30,8 @@ public class InMemoryEventQueueDemo {
         inputQueueAppender.appendEvent(MessageAndTime.requestMessage("Hello", System.nanoTime()));
         inputQueueAppender.appendEvent(MessageAndTime.requestMessage("Hello", System.nanoTime()));
 
-        while (defaultEngine.processOne()) {
+        EngineProcessingResult result;
+        while ( (result = defaultEngine.processOne()) != EngineProcessingResult.IDLE) {
         }
     }
 

@@ -30,16 +30,12 @@ public final class InMemoryEventQueue<$Event> implements EventQueue<$Event> {
 
         @Override
         public boolean read(final EventConsumer<$Event> eventConsumer) {
-            try {
-                final $Event event = queue.poll(1, TimeUnit.MILLISECONDS);
-                if (event != null) {
-                    // TODO: change System.nanoTime() with TimeProvider
-                    eventConsumer.onMessage(System.nanoTime(), messageIndex++, event);
-                    return true;
-                } else {
-                    return false;
-                }
-            } catch (final InterruptedException e) {
+            final $Event event = queue.poll();
+            if (event != null) {
+                // TODO: change System.nanoTime() with TimeProvider
+                eventConsumer.onMessage(System.nanoTime(), messageIndex++, event);
+                return true;
+            } else {
                 return false;
             }
         }
