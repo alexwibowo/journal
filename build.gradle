@@ -42,6 +42,8 @@ subprojects {
     		// This dependency is exported to consumers, that is to say found on their compile classpath.
 		api group:"org.jetbrains", name:"annotations", version:jetbrainsAnnotationsVersion
 
+		implementation platform("net.openhft:chronicle-bom:${chronicleBomVersion}")
+
 		// This dependency is used internally, and not exposed to consumers on their own compile classpath.
 		implementation 'com.google.guava:guava:27.0.1-jre'
 

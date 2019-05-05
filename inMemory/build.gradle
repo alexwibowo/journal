@@ -1,4 +1,5 @@
 
 dependencies {
-    compile project(":api")
+    api project(":api")
+    implementation ("net.openhft:chronicle-core")
 }
