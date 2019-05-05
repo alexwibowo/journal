@@ -4,14 +4,21 @@ import com.isolution.journal.api.EventAppender;
 import com.isolution.journal.api.EventConsumer;
 import com.isolution.journal.api.EventQueue;
 import com.isolution.journal.api.EventReader;
+import net.openhft.chronicle.core.time.TimeProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 public final class InMemoryEventQueue<$Event> implements EventQueue<$Event> {
 
     private LinkedBlockingQueue<$Event> queue = new LinkedBlockingQueue<$Event>();
+
+    @NotNull
+    private final TimeProvider timeProvider;
+
+    public InMemoryEventQueue(final @NotNull TimeProvider timeProvider) {
+        this.timeProvider = timeProvider;
+    }
 
     @Override
     @NotNull
@@ -32,8 +39,7 @@ public final class InMemoryEventQueue<$Event> implements EventQueue<$Event> {
         public boolean read(final EventConsumer<$Event> eventConsumer) {
             final $Event event = queue.poll();
             if (event != null) {
-                // TODO: change System.nanoTime() with TimeProvider
-                eventConsumer.onMessage(System.nanoTime(), messageIndex++, event);
+                eventConsumer.onMessage(timeProvider.currentTimeNanos(), messageIndex++, event);
                 return true;
             } else {
                 return false;
