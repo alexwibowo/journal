@@ -1,0 +1,5 @@
+dependencies {
+    api project(":api")
+    implementation ("net.openhft:chronicle-core")
+    api ("net.openhft:chronicle-queue")
+}
