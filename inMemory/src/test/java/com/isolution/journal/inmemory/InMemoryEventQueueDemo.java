@@ -1,5 +1,6 @@
 package com.isolution.journal.inmemory;
 
+import com.isolution.journal.MessageAndTime;
 import com.isolution.journal.api.*;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 
@@ -7,8 +8,8 @@ public class InMemoryEventQueueDemo {
 
     public static void main(String[] args) {
         final SystemTimeProvider timeProvider = SystemTimeProvider.INSTANCE;
-        final EventQueue<MessageAndTime> inputQueue = new InMemoryEventQueue<>(timeProvider);
-        final EventQueue<MessageAndTime> outputQueue = new InMemoryEventQueue<>(timeProvider);
+        final EventQueue<MessageAndTime> inputQueue = new InMemoryJournal<>(timeProvider);
+        final EventQueue<MessageAndTime> outputQueue = new InMemoryJournal<>(timeProvider);
         final DefaultEngine defaultEngine = new DefaultEngine<>(inputQueue, outputQueue, new EventProcessor<MessageAndTime, MessageAndTime>() {
             @Override
             public MessageAndTime process(final long eventTimeNanos,
@@ -37,32 +38,4 @@ public class InMemoryEventQueueDemo {
         }
     }
 
-    private static class MessageAndTime {
-        private String message;
-        private long originalTime;
-        private long timeNanos;
-
-        public static MessageAndTime requestMessage(final String message,
-                                                    final long timeNanos) {
-            return new MessageAndTime(message, Long.MIN_VALUE, timeNanos);
-        }
-
-        public static MessageAndTime responseMessage(final String message,
-                                                     final long originalTime,
-                                                     final long timeNanos) {
-            return new MessageAndTime(message, originalTime, timeNanos);
-        }
-
-        public MessageAndTime(final String message,
-                              final long originalTime,
-                              final long timeNanos) {
-            this.message = message;
-            this.originalTime = originalTime;
-            this.timeNanos = timeNanos;
-        }
-
-        public long latency() {
-            return timeNanos - originalTime;
-        }
-    }
 }

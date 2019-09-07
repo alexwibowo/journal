@@ -9,14 +9,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
-public final class InMemoryEventQueue<$Event> implements EventQueue<$Event> {
+public final class InMemoryJournal<$Event> implements EventQueue<$Event> {
 
     private LinkedBlockingQueue<$Event> queue = new LinkedBlockingQueue<$Event>();
 
     @NotNull
     private final TimeProvider timeProvider;
 
-    public InMemoryEventQueue(final @NotNull TimeProvider timeProvider) {
+    public InMemoryJournal(final @NotNull TimeProvider timeProvider) {
         this.timeProvider = timeProvider;
     }
 

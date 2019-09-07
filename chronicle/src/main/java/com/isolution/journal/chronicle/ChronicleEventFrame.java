@@ -83,6 +83,9 @@ public class ChronicleEventFrame {
             return null;
         }
 
+        void marshall(final BytesOut bytesOut) {
+
+        }
     }
 
     static class FieldLength {

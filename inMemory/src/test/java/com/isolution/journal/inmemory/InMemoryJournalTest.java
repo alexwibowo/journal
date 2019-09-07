@@ -15,10 +15,10 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
-class InMemoryEventQueueTest {
+class InMemoryJournalTest {
 
 
-    private InMemoryEventQueue<String> inMemoryEventQueue;
+    private InMemoryJournal<String> inMemoryJournal;
     private List<JournalEvent> consumedEvents = new ArrayList<>();
     private SetTimeProvider timeProvider;
     private @NotNull EventAppender<String> appender;
@@ -29,9 +29,9 @@ class InMemoryEventQueueTest {
     void setUp() {
         timeProvider = new SetTimeProvider(100);
         timeProvider.autoIncrement(1L, TimeUnit.NANOSECONDS);
-        inMemoryEventQueue = new InMemoryEventQueue<>(timeProvider);
-        appender = inMemoryEventQueue.appender();
-        reader = inMemoryEventQueue.reader();
+        inMemoryJournal = new InMemoryJournal<>(timeProvider);
+        appender = inMemoryJournal.appender();
+        reader = inMemoryJournal.reader();
 
         appendToConsumedEvents = (eventTimeNanos, messageIndex, message) -> consumedEvents.add(new JournalEvent(eventTimeNanos, messageIndex, message));
     }

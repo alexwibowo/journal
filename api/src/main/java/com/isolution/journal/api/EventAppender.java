@@ -1,6 +1,6 @@
 package com.isolution.journal.api;
 
-public interface EventAppender<$Event> {
+public interface EventAppender<Event> {
 
-    void appendEvent($Event event);
+    void appendEvent(Event event);
 }
