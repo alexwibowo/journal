@@ -1,8 +1,8 @@
 package com.isolution.journal.api;
 
-public interface Event<$Input, $Output> {
+public interface Event<$InputSource, $OutputDestination> {
 
-    void readFrom($Input source);
+    void readFrom($InputSource source);
 
-    void writeTo($Output destination);
+    void writeTo($OutputDestination destination);
 }

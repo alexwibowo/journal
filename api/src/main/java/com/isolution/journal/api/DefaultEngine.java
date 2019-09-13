@@ -2,7 +2,7 @@ package com.isolution.journal.api;
 
 import org.jetbrains.annotations.NotNull;
 
-public final class DefaultEngine<$InputEvent, $OutputEvent> implements Engine<$InputEvent, $OutputEvent> {
+public final class DefaultEngine<$InputEvent extends Event, $OutputEvent extends Event> implements Engine<$InputEvent, $OutputEvent> {
 
     private final EventReader<$InputEvent> inputEventReader;
     private final EventReader<$OutputEvent> outputEventReader;

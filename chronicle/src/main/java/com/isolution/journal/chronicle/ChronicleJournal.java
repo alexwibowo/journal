@@ -4,6 +4,7 @@ import com.isolution.journal.api.EventAppender;
 import com.isolution.journal.api.EventConsumer;
 import com.isolution.journal.api.EventQueue;
 import com.isolution.journal.api.EventReader;
+import com.isolution.journal.api.time.TimeProvider;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.queue.ChronicleQueue;
@@ -20,11 +21,14 @@ public final class ChronicleJournal implements EventQueue<ChronicleEvent> {
 
     private final ChronicleQueue chronicleQueue;
     private final Consumer<ChronicleEvent> eventConsumer;
+    private final TimeProvider timeProvider;
 
     public ChronicleJournal(final @NotNull ChronicleQueue chronicleQueue,
-                            final @NotNull Consumer<ChronicleEvent> eventConsumer) {
+                            final @NotNull Consumer<ChronicleEvent> eventConsumer,
+                            final @NotNull TimeProvider timeProvider) {
         this.chronicleQueue = requireNonNull(chronicleQueue);
         this.eventConsumer = requireNonNull(eventConsumer);
+        this.timeProvider = requireNonNull(timeProvider);
     }
 
 
@@ -35,15 +39,18 @@ public final class ChronicleJournal implements EventQueue<ChronicleEvent> {
 
     @Override
     public @NotNull ChronicleJournalWriter appender() {
-        return new ChronicleJournalWriter(chronicleQueue.acquireAppender());
+        return new ChronicleJournalWriter(chronicleQueue.acquireAppender(), timeProvider);
     }
 
     public static class ChronicleJournalWriter implements EventAppender<ChronicleEvent> {
         private final ExcerptAppender appender;
         private final ChronicleEventFrame eventFrame;
+        private final TimeProvider timeProvider;
 
-        public ChronicleJournalWriter(final ExcerptAppender appender) {
+        public ChronicleJournalWriter(final ExcerptAppender appender,
+                                      final TimeProvider timeProvider) {
             this.appender = appender;
+            this.timeProvider = timeProvider;
             this.eventFrame = new ChronicleEventFrame();
         }
 
@@ -53,8 +60,7 @@ public final class ChronicleJournal implements EventQueue<ChronicleEvent> {
                 final BytesOut<?> bytes = documentContext.wire().bytes();
                 eventFrame.prepare(bytes);
 
-                long eventTime  = 1; // FIXME: source event time properly
-                final ChronicleEventFrame.Writer writer = eventFrame.newEvent(eventTime);
+                final ChronicleEventFrame.Writer writer = eventFrame.newEvent(timeProvider.currentTimeNanos());
                 writer.write(event::writeTo);
             }
         }

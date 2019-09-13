@@ -5,13 +5,13 @@ import com.isolution.journal.api.DefaultEngine;
 import com.isolution.journal.api.EngineProcessingResult;
 import com.isolution.journal.api.EventAppender;
 import com.isolution.journal.api.EventProcessor;
+import com.isolution.journal.api.time.ChronicleTimeProvider;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueue;
 import net.openhft.chronicle.queue.impl.single.SingleChronicleQueueBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
-import java.util.function.Consumer;
 
 class ChronicleJournalDemo {
 
@@ -28,11 +28,12 @@ class ChronicleJournalDemo {
     void setUp() {
         final SingleChronicleQueue inputQueue = SingleChronicleQueueBuilder.binary(inputQueueFolder).build();
         final SingleChronicleQueue outputQueue = SingleChronicleQueueBuilder.binary(outputQueueFolder).build();
+        final ChronicleTimeProvider chronicleTimeProvider = new ChronicleTimeProvider();
         inputJournal = new ChronicleJournal<>(inputQueue, messageAndTime -> {
 
-        });
+        }, chronicleTimeProvider);
         outputJournal = new ChronicleJournal<>(outputQueue, messageAndTime -> {
-        });
+        }, chronicleTimeProvider);
         final DefaultEngine defaultEngine = new DefaultEngine<>(inputJournal, outputJournal, new EventProcessor<MessageAndTime, MessageAndTime>() {
             @Override
             public MessageAndTime process(final long eventTimeNanos,
@@ -53,8 +54,8 @@ class ChronicleJournalDemo {
         });
 
         EventAppender<MessageAndTime> appender = inputJournal.appender();
-        appender.appendEvent(MessageAndTime.requestMessage("Hello", timeProvider.currentTimeNanos()));
-        appender.appendEvent(MessageAndTime.requestMessage("Hello", timeProvider.currentTimeNanos()));
+        appender.appendEvent(MessageAndTime.requestMessage("Hello", chronicleTimeProvider.currentTimeNanos()));
+        appender.appendEvent(MessageAndTime.requestMessage("Hello", chronicleTimeProvider.currentTimeNanos()));
         while ( (result = defaultEngine.processOne()) != EngineProcessingResult.IDLE) {
         }
     }

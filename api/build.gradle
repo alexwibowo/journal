@@ -3,6 +3,5 @@ plugins {
 }
 
 dependencies {
-
-    testCompile project(":api").sourceSets.test.output
+    implementation ("net.openhft:chronicle-core")
 }
