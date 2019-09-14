@@ -60,8 +60,8 @@ public final class ChronicleJournal implements EventQueue<ChronicleEvent> {
                 final BytesOut<?> bytes = documentContext.wire().bytes();
                 eventFrame.prepare(bytes);
 
-                final ChronicleEventFrame.Writer writer = eventFrame.newEvent(timeProvider.currentTimeNanos());
-                writer.write(event::writeTo);
+                eventFrame.newEvent(timeProvider.currentTimeNanos())
+                        .write(event.eventType(), event::writeTo);
             }
         }
     }
@@ -83,7 +83,7 @@ public final class ChronicleJournal implements EventQueue<ChronicleEvent> {
             final DocumentContext documentContext = tailer.readingDocument();
             if (documentContext.isPresent()) {
                 final BytesIn bytes = documentContext.wire().bytes();
-                eventFrame.reader(marshaller).read(bytes, eventConsumer);
+                eventFrame.reader().read(bytes, eventConsumer);
 
             }
             return false;

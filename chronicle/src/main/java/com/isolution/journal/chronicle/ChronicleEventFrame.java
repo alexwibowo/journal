@@ -5,6 +5,8 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ChronicleEventFrame {
@@ -35,16 +37,18 @@ public class ChronicleEventFrame {
         return writer;
     }
 
-    public Reader reader(Marshaller marshaller) {
-        return new Reader(marshaller);
+    public Reader reader() {
+        return new Reader();
     }
 
     class Writer {
 
-        void write(final Consumer<BytesOut> bytesOutConsumer){
+        void write(final byte eventType,
+                   final Consumer<BytesOut> bytesOutConsumer){
             bytesOut.writeByte(EventFrameCode.COMPLETE_EVENT.code);
             bytesOut.writeLong(createTimeNanos);
-            try (final AutoCloseable ignored = fieldLength.writeLength(bytesOut)) {
+            bytesOut.writeByte(eventType);
+            try (final AutoCloseable ignored = fieldLength.writeLengthOnCompletion(bytesOut)) {
                 bytesOutConsumer.accept(bytesOut);
             } catch (final Throwable e) {
                 // upon error, go back to the start and indicate that this is an incomplete document
@@ -54,37 +58,25 @@ public class ChronicleEventFrame {
         }
     }
 
-    class Reader<$Event> {
-        private final Marshaller<$Event> marshaller;
-
-        Reader(Marshaller<$Event> marshaller) {
-            this.marshaller = marshaller;
-        }
+    class Reader {
+        final Map<Byte, ChronicleEvent> templates = new HashMap<>();
 
         public void read(final BytesIn bytesIn,
-                         final EventConsumer<$Event> eventConsumer) {
+                         final EventConsumer<ChronicleEvent> eventConsumer) {
             final EventFrameCode eventFrameCode = EventFrameCode.from(bytesIn.readByte());
             final long createTimeNanos = bytesIn.readLong();
+            final byte eventType = bytesIn.readByte();
+
+            final ChronicleEvent chronicleEvent = templates.get(eventType);
+            chronicleEvent.readFrom(bytesIn);
             try (final AutoCloseable ignored = fieldLength.readLength(bytesIn)) {
-                $Event unmarshall = marshaller.unmarshall(bytesIn);
                 eventConsumer.onEvent(
                         createTimeNanos,
                         0,
-                        unmarshall);
+                        chronicleEvent);
             } catch (final Throwable throwable) {
-
+                // length reader automatically handle jumping to next frame
             }
-        }
-    }
-
-    static class Marshaller<E> {
-
-        E unmarshall(final BytesIn bytesIn) {
-            return null;
-        }
-
-        void marshall(final BytesOut bytesOut) {
-
         }
     }
 
@@ -92,7 +84,7 @@ public class ChronicleEventFrame {
         LengthUpdater lengthUpdater = new LengthUpdater();
         LengthReader lengthReader = new LengthReader();
 
-        public AutoCloseable writeLength(final @NotNull BytesOut bytesOut) {
+        public AutoCloseable writeLengthOnCompletion(final @NotNull BytesOut bytesOut) {
             return lengthUpdater.begin(bytesOut);
         }
         public AutoCloseable readLength(final @NotNull BytesIn bytesIn) {
